@@ -9,6 +9,13 @@ let delBtn = document.querySelector(".delete");
 
 let deleteMode = false;
 
+if (!localStorage.getItem('allTickets')) {
+    let allTickets = {};
+    allTickets = JSON.stringify(allTickets);
+    
+    localStorage.setItem('allTickets',allTickets);
+}
+
 addBtn.addEventListener("click", function () {
 
     delBtn.classList.remove('delete-selected');
@@ -49,10 +56,29 @@ addBtn.addEventListener("click", function () {
     taskInnerContainer.addEventListener('keypress', function (e) {
         if (e.key == "Enter") {
 
+            let id = uuid();
+            let task = e.currentTarget.innerText;
+
+            //step1=> jo bhi data hai localStorage mai usko lekr aao;
+            let allTickets = localStorage.getItem('allTickets');
+            allTickets = JSON.parse(allTickets);
+
+            //step2 => usko update kro;
+
+            let ticketObj = {
+                color: ticketColor,
+                taskValue: task,
+            }
+
+            allTickets[id] = ticketObj;
+
+            //step3=> wapis update object ko store krdo;
+
+            localStorage.setItem("allTickets", JSON.stringify(allTickets));
+
             let ticketDiv = document.createElement('div');
             ticketDiv.classList.add('ticket')
 
-            let id = uuid();
             ticketDiv.innerHTML =
                 `<div class="ticket-color ${ticketColor}"></div>
                     <div class="ticket-id">
@@ -83,7 +109,7 @@ addBtn.addEventListener("click", function () {
                     e.currentTarget.remove();
                 }
             })
-            grid.append(ticketDiv)
+            grid.append(ticketDiv);
             div.remove();
         }
     })
