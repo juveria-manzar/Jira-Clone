@@ -200,5 +200,7 @@ body {
   height: 76%;
   padding: 10px;
   overflow: auto;
+  text-align: center;
+  outline: none;
   background-color: #f7f1e3;
 }

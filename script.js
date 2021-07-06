@@ -12,8 +12,8 @@ let deleteMode = false;
 if (!localStorage.getItem('allTickets')) {
     let allTickets = {};
     allTickets = JSON.stringify(allTickets);
-    
-    localStorage.setItem('allTickets',allTickets);
+
+    localStorage.setItem('allTickets', allTickets);
 }
 
 addBtn.addEventListener("click", function () {
@@ -79,12 +79,14 @@ addBtn.addEventListener("click", function () {
             let ticketDiv = document.createElement('div');
             ticketDiv.classList.add('ticket')
 
+            ticketDiv.setAttribute('data-id', id);
+
             ticketDiv.innerHTML =
-                `<div class="ticket-color ${ticketColor}"></div>
+                `<div data-id="${id}" class="ticket-color ${ticketColor}"></div>
                     <div class="ticket-id">
                     #${id}
                     </div>
-                <div class="actual-task">${e.currentTarget.innerText}</div>`
+                <div data-id="${id}" class="actual-task" contentEditable="true">${e.currentTarget.innerText}</div>`
 
             let ticketColorDiv = ticketDiv.querySelector('.ticket-color');
             ticketColorDiv.addEventListener('click', function (e) {
@@ -102,10 +104,36 @@ addBtn.addEventListener("click", function () {
 
                 ticketColorDiv.classList.remove(currColor);
                 ticketColorDiv.classList.add(newColor);
+
+                //color change in local storage
+                let currId = e.currentTarget.getAttribute('data-id');
+                let allTickets = JSON.parse(localStorage.getItem('allTickets'));
+                allTickets[currId].color = newColor;
+                localStorage.setItem('allTickets', JSON.stringify(allTickets));
+
             });
+
+            let actualTaskDiv = ticketDiv.querySelector('.actual-task');
+            actualTaskDiv.addEventListener('input', function (e) {
+                let updatedTask = e.currentTarget.innerText;
+
+                let currId = e.currentTarget.getAttribute('data-id')
+                let allTickets = JSON.parse(localStorage.getItem('allTickets'));
+
+                allTickets[currId].taskValue = updatedTask;
+                localStorage.setItem('allTickets', JSON.stringify(allTickets));
+            })
 
             ticketDiv.addEventListener('click', function (e) {
                 if (deleteMode == true) {
+
+                    let currId = e.currentTarget.getAttribute('data-id');
+
+                    let allTickets = JSON.parse(localStorage.getItem('allTickets'));
+
+                    delete allTickets[currId];
+
+                    localStorage.setItem('allTickets', JSON.stringify(allTickets))
                     e.currentTarget.remove();
                 }
             })
