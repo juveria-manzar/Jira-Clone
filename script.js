@@ -1,10 +1,18 @@
 
 let addBtn = document.querySelector(".add");
+
 let body = document.querySelector("body");
 
 let grid = document.querySelector('.grid');
 
+let delBtn = document.querySelector(".delete");
+
+let deleteMode = false;
+
 addBtn.addEventListener("click", function () {
+
+    delBtn.classList.remove('delete-selected');
+    deleteMode = false;
 
     let preModal = document.querySelector('.modal')
     if (preModal != null) return;
@@ -44,10 +52,13 @@ addBtn.addEventListener("click", function () {
             let ticketDiv = document.createElement('div');
             ticketDiv.classList.add('ticket')
 
+            let id = uuid();
             ticketDiv.innerHTML =
                 `<div class="ticket-color ${ticketColor}"></div>
-            <div class="ticket-id">#aeid</div>
-            <div class="actual-task">${e.currentTarget.innerText}</div>`
+                    <div class="ticket-id">
+                    #${id}
+                    </div>
+                <div class="actual-task">${e.currentTarget.innerText}</div>`
 
             let ticketColorDiv = ticketDiv.querySelector('.ticket-color');
             ticketColorDiv.addEventListener('click', function (e) {
@@ -59,17 +70,33 @@ addBtn.addEventListener("click", function () {
                 }
 
                 index++;
-                index=index%4;
+                index = index % 4;
 
-                let newColor=colors[index];
+                let newColor = colors[index];
 
                 ticketColorDiv.classList.remove(currColor);
                 ticketColorDiv.classList.add(newColor);
             });
+
+            ticketDiv.addEventListener('click', function (e) {
+                if (deleteMode == true) {
+                    e.currentTarget.remove();
+                }
+            })
             grid.append(ticketDiv)
             div.remove();
         }
     })
 
     body.append(div);
+});
+
+delBtn.addEventListener('click', function (e) {
+    if (e.currentTarget.classList.contains("delete-selected")) {
+        e.currentTarget.classList.remove("delete-selected");
+        deleteMode = false;
+    } else {
+        e.currentTarget.classList.add('delete-selected');
+        deleteMode = true;
+    }
 });
