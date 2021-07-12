@@ -5,6 +5,17 @@ let body = document.querySelector("body");
 
 let grid = document.querySelector('.grid');
 
+let colors = ["pink", "blue", "green", "black"]
+
+let allFiltersChildren = document.querySelectorAll(".filter div")
+
+for (let i = 0; i < allFiltersChildren.length; i++) {
+    allFiltersChildren[i].addEventListener('click', function (e) {
+        let filterColor = e.currentTarget.classList[0];
+        loadTasks(filterColor)
+    })
+}
+
 let delBtn = document.querySelector(".delete");
 
 let deleteMode = false;
@@ -15,6 +26,8 @@ if (!localStorage.getItem('allTickets')) {
 
     localStorage.setItem('allTickets', allTickets);
 }
+
+loadTasks()
 
 addBtn.addEventListener("click", function () {
 
@@ -40,7 +53,7 @@ addBtn.addEventListener("click", function () {
     </div>`
 
     let ticketColor = "black"
-    let colors = ["pink", "blue", "green", "black"]
+    
     let allFilters = div.querySelectorAll('.modal-priority');
     for (let i = 0; i < allFilters.length; i++) {
         allFilters[i].addEventListener('click', function (e) {
@@ -154,3 +167,89 @@ delBtn.addEventListener('click', function (e) {
         deleteMode = true;
     }
 });
+
+
+function loadTasks(color) {
+
+    let ticketsOnUi = document.querySelectorAll(".ticket")
+
+    for (let i = 0; i < ticketsOnUi.length; i++) {
+        ticketsOnUi[i].remove();
+    }
+    //1- fetch all tickets data
+    let allTickets = JSON.parse(localStorage.getItem("allTickets"))
+
+    //2- create ticket UI for each ticket obj
+    //3- attach required listeners
+    //4- add tickets in the grid section of ui
+    for (x in allTickets) {
+        let currTicketId = x;
+        let singleTicketObj = allTickets[x];
+
+        if (color && color != singleTicketObj.color) continue
+
+        let ticketDiv = document.createElement('div');
+        ticketDiv.classList.add('ticket')
+
+        ticketDiv.setAttribute('data-id', currTicketId);
+
+        ticketDiv.innerHTML =
+            `<div data-id="${currTicketId}" class="ticket-color ${singleTicketObj.color}"></div>
+                    <div class="ticket-id">
+                    #${currTicketId}
+                    </div>
+                <div data-id="${currTicketId}" class="actual-task" contentEditable="true">${singleTicketObj.taskValue}</div>`
+
+        let ticketColorDiv = ticketDiv.querySelector('.ticket-color');
+        let actualTaskDiv = ticketDiv.querySelector('.actual-task');
+        actualTaskDiv.addEventListener('input', function (e) {
+            let updatedTask = e.currentTarget.innerText;
+
+            let currId = e.currentTarget.getAttribute('data-id')
+            let allTickets = JSON.parse(localStorage.getItem('allTickets'));
+
+            allTickets[currId].taskValue = updatedTask;
+            localStorage.setItem('allTickets', JSON.stringify(allTickets));
+        })
+
+        ticketColorDiv.addEventListener('click', function (e) {
+            let currColor = e.currentTarget.classList[1];
+
+            let index = -1
+            for (let i = 0; i < colors.length; i++) {
+                if (colors[i] == currColor) index = i;
+            }
+
+            index++;
+            index = index % 4;
+
+            let newColor = colors[index];
+
+            ticketColorDiv.classList.remove(currColor);
+            ticketColorDiv.classList.add(newColor);
+
+            //color change in local storage
+            let currId = e.currentTarget.getAttribute('data-id');
+            let allTickets = JSON.parse(localStorage.getItem('allTickets'));
+            allTickets[currId].color = newColor;
+            localStorage.setItem('allTickets', JSON.stringify(allTickets));
+
+        });
+
+        ticketDiv.addEventListener('click', function (e) {
+            if (deleteMode == true) {
+
+                let currId = e.currentTarget.getAttribute('data-id');
+
+                let allTickets = JSON.parse(localStorage.getItem('allTickets'));
+
+                delete allTickets[currId];
+
+                localStorage.setItem('allTickets', JSON.stringify(allTickets))
+                e.currentTarget.remove();
+            }
+        })
+
+        grid.append(ticketDiv);
+    }
+}
